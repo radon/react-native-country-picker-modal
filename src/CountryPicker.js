@@ -72,6 +72,7 @@ export default class CountryPicker extends Component {
     styles: PropTypes.object,
     filterPlaceholder: PropTypes.string,
     autoFocusFilter: PropTypes.bool,
+    emptyChoiceText: PropTypes.string,
     // to provide a functionality to disable/enable the onPress of Country Picker.
     disabled: PropTypes.bool,
     filterPlaceholderTextColor: PropTypes.string,
@@ -90,6 +91,7 @@ export default class CountryPicker extends Component {
     filterPlaceholder: 'Filter',
     autoFocusFilter: true,
     transparent: false,
+    emptyChoiceText: '',
     animationType: 'none'
   }
 
@@ -151,7 +153,7 @@ export default class CountryPicker extends Component {
     this.state = {
       modalVisible: false,
       cca2List: countryList,
-      dataSource: ds.cloneWithRows(countryList),
+      dataSource: ds.cloneWithRows([null, ...countryList]),
       filter: '',
       letters: this.getLetters(countryList)
     }
@@ -198,11 +200,21 @@ export default class CountryPicker extends Component {
     }
   }
 
+  onSelectEmpty() {
+    this.setState({
+      modalVisible: false,
+      filter: '',
+      dataSource: ds.cloneWithRows([null, ...this.state.cca2List])
+    })
+
+    this.props.onChange(null)
+  }
+
   onSelectCountry(cca2) {
     this.setState({
       modalVisible: false,
       filter: '',
-      dataSource: ds.cloneWithRows(this.state.cca2List)
+      dataSource: ds.cloneWithRows([null, ...this.state.cca2List])
     })
 
     this.props.onChange({
@@ -217,7 +229,7 @@ export default class CountryPicker extends Component {
     this.setState({
       modalVisible: false,
       filter: '',
-      dataSource: ds.cloneWithRows(this.state.cca2List)
+      dataSource: ds.cloneWithRows([null, ...this.state.cca2List])
     })
     if (this.props.onClose) {
       this.props.onClose()
@@ -280,7 +292,7 @@ export default class CountryPicker extends Component {
 
   handleFilterChange = value => {
     const filteredCountries =
-      value === '' ? this.state.cca2List : this.fuse.search(value)
+      value === '' ? [null, ...this.state.cca2List] : this.fuse.search(value)
 
     this._listView.scrollTo({ y: 0 })
 
@@ -329,6 +341,26 @@ export default class CountryPicker extends Component {
           </Text>
         </View>
       </View>
+    )
+  }
+
+  renderEmptyChoice(index) {
+    return (
+      <TouchableOpacity
+        key={index}
+        onPress={() => this.onSelectEmpty()}
+        activeOpacity={0.99}
+      >
+        <View style={styles.itemCountry}>
+          <View style={[styles.itemCountryFlag, {width: '5%'}]}>
+          </View>
+          <View style={[styles.itemCountryName, {width: '80%'}]}>
+            <Text style={styles.countryName} allowFontScaling={false}>
+              {this.props.emptyChoiceText}
+            </Text>
+          </View>
+        </View>
+      </TouchableOpacity>
     )
   }
 
@@ -401,7 +433,7 @@ export default class CountryPicker extends Component {
                   enableEmptySections
                   ref={listView => (this._listView = listView)}
                   dataSource={this.state.dataSource}
-                  renderRow={country => this.renderCountry(country)}
+                  renderRow={country => country ? this.renderCountry(country) : this.renderEmptyChoice()}
                   initialListSize={30}
                   pageSize={15}
                   onLayout={({ nativeEvent: { layout: { y: offset } } }) =>
