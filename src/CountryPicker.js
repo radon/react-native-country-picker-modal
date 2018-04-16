@@ -38,17 +38,17 @@ const FLAG_TYPES = {
 }
 
 const setCountries = flagType => {
-  if (typeof flagType !== 'undefined') {
+  /* if (typeof flagType !== 'undefined') {
     isEmojiable = flagType === FLAG_TYPES.emoji
-  }
+  } */
 
-  if (isEmojiable) {
+  /* if (isEmojiable) {
     countries = require('../data/countries-emoji')
     Emoji = require('./emoji').default
-  } else {
+  } else { */
     countries = require('../data/countries')
     Emoji = <View />
-  }
+  // }
 }
 
 const ds = new ListView.DataSource({ rowHasChanged: (r1, r2) => r1 !== r2 })
