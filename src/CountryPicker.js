@@ -171,7 +171,21 @@ export default class CountryPicker extends Component {
       styles = countryPickerStyles
     }
 
-    this.fuse = new Fuse(
+    this.fuse = this.generateFuse(countryList)
+  }
+
+  componentDidMount () {
+    this.updateCountryList(this.props.countryList, this.props.excludeCountries)
+  }
+
+  componentWillReceiveProps(nextProps) {
+    if (nextProps.countryList !== this.props.countryList || nextProps.excludeCountries !== this.props.excludeCountries) {
+      this.updateCountryList(nextProps.countryList, nextProps.excludeCountries)
+    }
+  }
+  
+  generateFuse = (countryList) => {
+    return new Fuse(
       countryList.reduce(
         (acc, item) => [
           ...acc,
@@ -192,21 +206,13 @@ export default class CountryPicker extends Component {
     )
   }
 
-  componentDidMount () {
-    this.updateCountryList(this.props.countryList, this.props.excludeCountries)
-  }
-
-  componentWillReceiveProps(nextProps) {
-    if (nextProps.countryList !== this.props.countryList || nextProps.excludeCountries !== this.props.excludeCountries) {
-      this.updateCountryList(nextProps.countryList, nextProps.excludeCountries)
-    }
-  }
-  
   updateCountryList = (countryList, excludeCountries = []) => {
-    const cca2List = countryList.filter(c => !excludeCountries.includes(c.id))
+    const cca2List = countryList.filter(c => !excludeCountries.includes(c))
     this.setState({
       cca2List,
       dataSource: ds.cloneWithRows(cca2List)
+    }, () => {
+      this.fuse = this.generateFuse(cca2List)
     })
   }
 
