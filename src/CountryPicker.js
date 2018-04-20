@@ -132,13 +132,14 @@ export default class CountryPicker extends Component {
     let countryList = [...props.countryList]
     const excludeCountries = [...props.excludeCountries]
 
-    excludeCountries.forEach(excludeCountry => {
-      const index = countryList.indexOf(excludeCountry)
+    countryList = countryList.filter(c => !excludeCountries.includes(c))
+    // excludeCountries.forEach(excludeCountry => {
+    //   const index = countryList.indexOf(excludeCountry)
 
-      if (index !== -1) {
-        countryList.splice(index, 1)
-      }
-    })
+    //   if (index !== -1) {
+    //     countryList.splice(index, 1)
+    //   }
+    // })
 
     // Sort country list
     countryList = countryList
@@ -191,13 +192,22 @@ export default class CountryPicker extends Component {
     )
   }
 
+  componentDidMount () {
+    this.updateCountryList(this.props.countryList, this.props.excludeCountries)
+  }
+
   componentWillReceiveProps(nextProps) {
-    if (nextProps.countryList !== this.props.countryList) {
-      this.setState({
-        cca2List: nextProps.countryList,
-        dataSource: ds.cloneWithRows(nextProps.countryList)
-      })
+    if (nextProps.countryList !== this.props.countryList || nextProps.excludeCountries !== this.props.excludeCountries) {
+      this.updateCountryList(nextProps.countryList, nextProps.excludeCountries)
     }
+  }
+  
+  updateCountryList = (countryList, excludeCountries = []) => {
+    const cca2List = countryList.filter(c => !excludeCountries.includes(c.id))
+    this.setState({
+      cca2List,
+      dataSource: ds.cloneWithRows(cca2List)
+    })
   }
 
   onSelectEmpty() {
