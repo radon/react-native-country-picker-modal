@@ -241,25 +241,21 @@ export default class CountryPicker extends Component {
   }
 
   onClose = () => {
-    console.log('CountryPicker onClose')
     this.setState({
       modalVisible: false,
       filter: '',
       dataSource: ds.cloneWithRows([null, ...this.state.cca2List])
     })
     if (this.props.onClose) {
-      console.log('CountryPicker onClose callback')
       this.props.onClose()
     }
   }
 
   onOpen = () => {
-    console.log('CountryPicker onOpen')
     this.setState({
       modalVisible: true
     })
     if (typeof this.props.onOpen === 'function') {
-      console.log('CountryPicker onOpen callback')
       this.props.onOpen()
     }
   }
@@ -420,7 +416,7 @@ export default class CountryPicker extends Component {
       <View>
         <TouchableOpacity
           disabled={this.props.disabled}
-          onPress={() => this.onOpen()}
+          onPress={this.onOpen}
           activeOpacity={0.7}
         >
           {this.props.children ? (
@@ -437,7 +433,7 @@ export default class CountryPicker extends Component {
           transparent={this.props.transparent}
           animationType={this.props.animationType}
           visible={this.state.modalVisible}
-          onRequestClose={() => this.setState({ modalVisible: false })}
+          onRequestClose={this.onClose}
         >
           <SafeAreaView style={styles.modalContainer}>
             <View style={styles.header}>
