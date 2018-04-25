@@ -141,14 +141,7 @@ export default class CountryPicker extends Component {
     // })
 
     // Sort country list
-    countryList = countryList
-      .map(c => [c, this.getCountryName(countries[c])])
-      .sort((a, b) => {
-        if (a[1] < b[1]) return -1
-        if (a[1] > b[1]) return 1
-        return 0
-      })
-      .map(c => c[0])
+    countryList = this.orderCountryList(countryList)
 
     this.state = {
       modalVisible: false,
@@ -182,6 +175,17 @@ export default class CountryPicker extends Component {
       this.updateCountryList(nextProps.countryList, nextProps.excludeCountries)
     }
   }
+
+  orderCountryList = (countryList) => (
+    countryList
+    .map(c => [c, this.getCountryName(countries[c])])
+    .sort((a, b) => {
+      if (a[1] < b[1]) return -1
+      if (a[1] > b[1]) return 1
+      return 0
+    })
+    .map(c => c[0])
+  )
   
   generateFuse = (countryList) => {
     return new Fuse(
@@ -206,7 +210,7 @@ export default class CountryPicker extends Component {
   }
 
   updateCountryList = (countryList, excludeCountries = []) => {
-    const cca2List = countryList.filter(c => !excludeCountries.includes(c))
+    const cca2List = this.orderCountryList(countryList).filter(c => !excludeCountries.includes(c))
     this.setState({
       cca2List,
       dataSource: ds.cloneWithRows(cca2List)
