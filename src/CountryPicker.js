@@ -64,6 +64,7 @@ export default class CountryPicker extends Component {
     translation: PropTypes.string,
     onChange: PropTypes.func.isRequired,
     onClose: PropTypes.func,
+    onOpen: PropTypes.func,
     closeable: PropTypes.bool,
     filterable: PropTypes.bool,
     children: PropTypes.node,
@@ -126,8 +127,6 @@ export default class CountryPicker extends Component {
 
   constructor(props) {
     super(props)
-    this.openModal = this.openModal.bind(this)
-
     setCountries(props.flagType)
     let countryList = [...props.countryList]
     const excludeCountries = [...props.excludeCountries]
@@ -242,13 +241,26 @@ export default class CountryPicker extends Component {
   }
 
   onClose = () => {
+    console.log('CountryPicker onClose')
     this.setState({
       modalVisible: false,
       filter: '',
       dataSource: ds.cloneWithRows([null, ...this.state.cca2List])
     })
     if (this.props.onClose) {
+      console.log('CountryPicker onClose callback')
       this.props.onClose()
+    }
+  }
+
+  onOpen = () => {
+    console.log('CountryPicker onOpen')
+    this.setState({
+      modalVisible: true
+    })
+    if (typeof this.props.onOpen === 'function') {
+      console.log('CountryPicker onOpen callback')
+      this.props.onOpen()
     }
   }
 
@@ -275,15 +287,11 @@ export default class CountryPicker extends Component {
     ).sort()
   }
 
-  openModal = this.openModal.bind(this)
 
   // dimensions of country list and window
   itemHeight = getHeightPercent(7)
   listHeight = countries.length * this.itemHeight
 
-  openModal() {
-    this.setState({ modalVisible: true })
-  }
 
   scrollTo(letter) {
     // find position of first country that starts with letter
@@ -412,7 +420,7 @@ export default class CountryPicker extends Component {
       <View>
         <TouchableOpacity
           disabled={this.props.disabled}
-          onPress={() => this.setState({ modalVisible: true })}
+          onPress={() => this.onOpen()}
           activeOpacity={0.7}
         >
           {this.props.children ? (
