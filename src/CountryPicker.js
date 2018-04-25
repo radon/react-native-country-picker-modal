@@ -417,11 +417,12 @@ export default class CountryPicker extends Component {
 
   render() {
     return (
-      <View>
+      <View style={styles.container}>
         <TouchableOpacity
           disabled={this.props.disabled}
           onPress={this.onOpen}
           activeOpacity={0.7}
+          style={styles.mainTouchable}
         >
           {this.props.children ? (
             this.props.children
