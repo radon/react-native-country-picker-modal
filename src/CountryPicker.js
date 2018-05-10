@@ -213,7 +213,7 @@ export default class CountryPicker extends Component {
     const cca2List = this.orderCountryList(countryList).filter(c => !excludeCountries.includes(c))
     this.setState({
       cca2List,
-      dataSource: ds.cloneWithRows(cca2List)
+      dataSource: ds.cloneWithRows([null, ...cca2List])
     }, () => {
       this.fuse = this.generateFuse(cca2List)
     })
