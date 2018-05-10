@@ -264,6 +264,14 @@ export default class CountryPicker extends Component {
     }
   }
 
+  onPress = () => {
+    if (typeof this.props.onOpen === 'function') {
+      this.props.onPress()
+    } else {
+      this.onOpen()
+    }
+  }
+
   getCountryName(country, optionalTranslation) {
     const translation = optionalTranslation || this.props.translation || 'eng'
     return country.name[translation] || country.name.common
@@ -420,7 +428,7 @@ export default class CountryPicker extends Component {
       <View style={styles.container}>
         <TouchableOpacity
           disabled={this.props.disabled}
-          onPress={this.onOpen}
+          onPress={this.onPress}
           activeOpacity={0.7}
           style={styles.mainTouchable}
         >
