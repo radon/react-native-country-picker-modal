@@ -3,7 +3,7 @@
 
 import React, { Component } from 'react'
 import PropTypes from 'prop-types'
-import SafeAreaView from 'react-native-safe-area-view'
+import {SafeAreaView} from 'react-native'
 
 import {
   StyleSheet,
@@ -13,9 +13,8 @@ import {
   Modal,
   Text,
   TextInput,
-  ListView,
-  ScrollView,
-  Platform
+  FlatList,
+  ScrollView
 } from 'react-native'
 
 import Fuse from 'fuse.js'
@@ -37,7 +36,7 @@ const FLAG_TYPES = {
   emoji: 'emoji'
 }
 
-const setCountries = flagType => {
+const setCountries = () => {
   /* if (typeof flagType !== 'undefined') {
     isEmojiable = flagType === FLAG_TYPES.emoji
   } */
@@ -51,7 +50,7 @@ const setCountries = flagType => {
   // }
 }
 
-const ds = new ListView.DataSource({ rowHasChanged: (r1, r2) => r1 !== r2 })
+// const ds = new ListView.DataSource({ rowHasChanged: (r1, r2) => r1 !== r2 })
 
 setCountries()
 
@@ -142,11 +141,12 @@ export default class CountryPicker extends Component {
 
     // Sort country list
     countryList = this.orderCountryList(countryList)
+    console.log({countryList})
 
     this.state = {
       modalVisible: false,
       cca2List: countryList,
-      dataSource: ds.cloneWithRows([null, ...countryList]),
+      dataSource: [null, ...countryList],
       filter: '',
       letters: this.getLetters(countryList)
     }
@@ -170,7 +170,7 @@ export default class CountryPicker extends Component {
     this.updateCountryList(this.props.countryList, this.props.excludeCountries)
   }
 
-  componentWillReceiveProps(nextProps) {
+  UNSAFE_componentWillReceiveProps(nextProps) {
     if (nextProps.countryList !== this.props.countryList || nextProps.excludeCountries !== this.props.excludeCountries) {
       this.updateCountryList(nextProps.countryList, nextProps.excludeCountries)
     }
@@ -213,7 +213,7 @@ export default class CountryPicker extends Component {
     const cca2List = this.orderCountryList(countryList).filter(c => !excludeCountries.includes(c))
     this.setState({
       cca2List,
-      dataSource: ds.cloneWithRows([null, ...cca2List])
+      dataSource: [null, ...cca2List]
     }, () => {
       this.fuse = this.generateFuse(cca2List)
     })
@@ -223,7 +223,7 @@ export default class CountryPicker extends Component {
     this.setState({
       modalVisible: false,
       filter: '',
-      dataSource: ds.cloneWithRows([null, ...this.state.cca2List])
+      dataSource: [null, ...this.state.cca2List]
     })
 
     this.props.onChange(null)
@@ -233,7 +233,7 @@ export default class CountryPicker extends Component {
     this.setState({
       modalVisible: false,
       filter: '',
-      dataSource: ds.cloneWithRows([null, ...this.state.cca2List])
+      dataSource: [null, ...this.state.cca2List]
     })
 
     this.props.onChange({
@@ -248,7 +248,7 @@ export default class CountryPicker extends Component {
     this.setState({
       modalVisible: false,
       filter: '',
-      dataSource: ds.cloneWithRows([null, ...this.state.cca2List])
+      dataSource: [null, ...this.state.cca2List]
     })
     if (this.props.onClose) {
       this.props.onClose()
@@ -277,9 +277,9 @@ export default class CountryPicker extends Component {
     return country.name[translation] || country.name.common
   }
 
-  setVisibleListHeight(offset) {
-    this.visibleListHeight = getHeightPercent(100) - offset
-  }
+  // setVisibleListHeight(offset) {
+  //   this.visibleListHeight = getHeightPercent(100) - offset
+  // }
 
   getLetters(list) {
     return Object.keys(
@@ -301,6 +301,8 @@ export default class CountryPicker extends Component {
   listHeight = countries.length * this.itemHeight
 
 
+  getItemLayout = (data, index) => ({length: this.itemHeight, offset: this.itemHeight * (index + 1), index})
+
   scrollTo(letter) {
     // find position of first country that starts with letter
     const index = this.state.cca2List
@@ -309,17 +311,18 @@ export default class CountryPicker extends Component {
     if (index === -1) {
       return
     }
-    let position = index * this.itemHeight
+    this._listView.scrollToIndex({index})
+    // let position = index * this.itemHeight
 
-    // do not scroll past the end of the list
-    if (position + this.visibleListHeight > this.listHeight) {
-      position = this.listHeight - this.visibleListHeight
-    }
+    // // do not scroll past the end of the list
+    // if (position + this.visibleListHeight > this.listHeight) {
+    //   position = this.listHeight - this.visibleListHeight
+    // }
 
-    // scroll
-    this._listView.scrollTo({
-      y: position
-    })
+    // // scroll
+    // this._listView.scrollTo({
+    //   y: position
+    // })
   }
 
   handleFilterChange = value => {
@@ -330,7 +333,7 @@ export default class CountryPicker extends Component {
 
     this.setState({
       filter: value,
-      dataSource: ds.cloneWithRows(filteredCountries)
+      dataSource: filteredCountries
     })
   }
 
@@ -461,17 +464,19 @@ export default class CountryPicker extends Component {
             </View>
             <KeyboardAvoidingView behavior="padding">
               <View style={styles.contentContainer}>
-                <ListView
-                  keyboardShouldPersistTaps="always"
-                  enableEmptySections
+                <FlatList
+                  // keyboardShouldPersistTaps="always"
+                  // enableEmptySections
+                  keyExtractor={item => item}
                   ref={listView => (this._listView = listView)}
-                  dataSource={this.state.dataSource}
-                  renderRow={country => country ? this.renderCountry(country) : this.renderEmptyChoice()}
-                  initialListSize={30}
-                  pageSize={15}
-                  onLayout={({ nativeEvent: { layout: { y: offset } } }) =>
-                    this.setVisibleListHeight(offset)
-                  }
+                  data={this.state.dataSource}
+                  renderItem={({item, index}) => item ? this.renderCountry(item, index) : this.renderEmptyChoice()}
+                  initialNumToRender={30}
+                  getItemLayout={this.getItemLayout}
+                  // pageSize={15}
+                  // onLayout={({ nativeEvent: { layout: { y: offset } } }) =>
+                  //   this.setVisibleListHeight(offset)
+                  // }
                 />
                 {!this.props.hideAlphabetFilter && (
                   <ScrollView
