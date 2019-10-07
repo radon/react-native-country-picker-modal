@@ -141,7 +141,7 @@ export default class CountryPicker extends Component {
 
     // Sort country list
     countryList = this.orderCountryList(countryList)
-    console.log({countryList})
+    // console.log({countryList})
 
     this.state = {
       modalVisible: false,
