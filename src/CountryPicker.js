@@ -3,9 +3,8 @@
 
 import React, { Component } from 'react'
 import PropTypes from 'prop-types'
-import {SafeAreaView} from 'react-native'
-
 import {
+  SafeAreaView,
   StyleSheet,
   View,
   Image,
@@ -16,9 +15,7 @@ import {
   FlatList,
   ScrollView
 } from 'react-native'
-
 import Fuse from 'fuse.js'
-
 import cca2List from '../data/cca2'
 import { getHeightPercent } from './ratio'
 import CloseButton from './CloseButton'
@@ -29,7 +26,7 @@ let countries = null
 let Emoji = null
 let styles = {}
 
-let isEmojiable = false
+const isEmojiable = false
 
 const FLAG_TYPES = {
   flat: 'flat',
@@ -45,8 +42,8 @@ const setCountries = () => {
     countries = require('../data/countries-emoji')
     Emoji = require('./emoji').default
   } else { */
-    countries = require('../data/countries')
-    Emoji = <View />
+  countries = require('../data/countries')
+  Emoji = <View />
   // }
 }
 
@@ -129,6 +126,7 @@ export default class CountryPicker extends Component {
     setCountries(props.flagType)
     let countryList = [...props.countryList]
     const excludeCountries = [...props.excludeCountries]
+    this._flatList = React.createRef()
 
     countryList = countryList.filter(c => !excludeCountries.includes(c))
     // excludeCountries.forEach(excludeCountry => {
@@ -166,12 +164,13 @@ export default class CountryPicker extends Component {
     this.fuse = this.generateFuse(countryList)
   }
 
-  componentDidMount () {
+  componentDidMount() {
     this.updateCountryList(this.props.countryList, this.props.excludeCountries)
   }
 
   UNSAFE_componentWillReceiveProps(nextProps) {
-    if (nextProps.countryList !== this.props.countryList || nextProps.excludeCountries !== this.props.excludeCountries) {
+    if (nextProps.countryList !== this.props.countryList
+      || nextProps.excludeCountries !== this.props.excludeCountries) {
       this.updateCountryList(nextProps.countryList, nextProps.excludeCountries)
     }
   }
@@ -186,7 +185,7 @@ export default class CountryPicker extends Component {
     })
     .map(c => c[0])
   )
-  
+
   generateFuse = (countryList) => {
     return new Fuse(
       countryList.reduce(
@@ -210,12 +209,12 @@ export default class CountryPicker extends Component {
   }
 
   updateCountryList = (countryList, excludeCountries = []) => {
-    const cca2List = this.orderCountryList(countryList).filter(c => !excludeCountries.includes(c))
+    const filteredCca2List = this.orderCountryList(countryList).filter(c => !excludeCountries.includes(c))
     this.setState({
-      cca2List,
-      dataSource: [null, ...cca2List]
+      cca2List: filteredCca2List,
+      dataSource: [null, ...filteredCca2List]
     }, () => {
-      this.fuse = this.generateFuse(cca2List)
+      this.fuse = this.generateFuse(filteredCca2List)
     })
   }
 
@@ -301,7 +300,7 @@ export default class CountryPicker extends Component {
   listHeight = countries.length * this.itemHeight
 
 
-  getItemLayout = (data, index) => ({length: this.itemHeight, offset: this.itemHeight * (index + 1), index})
+  getItemLayout = (data, index) => ({ length: this.itemHeight, offset: this.itemHeight * (index + 1), index })
 
   scrollTo(letter) {
     // find position of first country that starts with letter
@@ -311,7 +310,7 @@ export default class CountryPicker extends Component {
     if (index === -1) {
       return
     }
-    this._listView.scrollToIndex({index})
+    this._flatList.current.scrollToIndex({ index })
     // let position = index * this.itemHeight
 
     // // do not scroll past the end of the list
@@ -329,7 +328,7 @@ export default class CountryPicker extends Component {
     const filteredCountries =
       value === '' ? [null, ...this.state.cca2List] : this.fuse.search(value)
 
-    this._listView.scrollTo({ y: 0 })
+    this._flatList.current.scrollToIndex({ index: 0 })
 
     this.setState({
       filter: value,
@@ -468,9 +467,9 @@ export default class CountryPicker extends Component {
                   // keyboardShouldPersistTaps="always"
                   // enableEmptySections
                   keyExtractor={item => item}
-                  ref={listView => (this._listView = listView)}
+                  ref={this._flatList}
                   data={this.state.dataSource}
-                  renderItem={({item, index}) => item ? this.renderCountry(item, index) : this.renderEmptyChoice()}
+                  renderItem={({ item, index }) => item ? this.renderCountry(item, index) : this.renderEmptyChoice()}
                   initialNumToRender={30}
                   getItemLayout={this.getItemLayout}
                   // pageSize={15}
