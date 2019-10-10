@@ -36,8 +36,8 @@ const newcountries = countries
     }),
     {});
 
-if (!isCca2) {
-  console.log(JSON.stringify(newcountries)); // eslint-disable-line
-} else {
-  console.log(JSON.stringify(Object.keys(newcountries))); // eslint-disable-line
-}
+// if (!isCca2) {
+//   console.log(JSON.stringify(newcountries)); // eslint-disable-line
+// } else {
+//   console.log(JSON.stringify(Object.keys(newcountries))); // eslint-disable-line
+// }

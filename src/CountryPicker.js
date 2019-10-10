@@ -328,7 +328,7 @@ export default class CountryPicker extends Component {
     const filteredCountries =
       value === '' ? [null, ...this.state.cca2List] : this.fuse.search(value)
 
-    this._flatList.current.scrollToIndex({ index: 0 })
+    this._flatList.current.scrollToOffset({ offset: 0 })
 
     this.setState({
       filter: value,
